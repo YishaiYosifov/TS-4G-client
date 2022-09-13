@@ -1,5 +1,6 @@
 import threading
 import tkinter
+import ctypes
 import socket
 import json
 
@@ -16,5 +17,9 @@ class BlockScreen(threading.Thread):
         self.root.attributes("-fullscreen", True)
         self.root.attributes("-topmost", True)
         self.root.mainloop()
+
+def is_admin():
+    try: return ctypes.windll.shell32.IsUserAnAdmin()
+    except: return False
 
 blockScreen = BlockScreen()

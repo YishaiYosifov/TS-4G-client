@@ -3,7 +3,6 @@ from common.util import *
 import threading
 import keyboard
 import socket
-import time
 import json
 import os
 
@@ -34,14 +33,8 @@ if __name__ == "__main__":
     s.connect((IP, PORT))
     print(f"Connected to {IP}:{PORT}")
 
-    threading.Thread(target=main).start()
+    threading.Thread(target=temp_send_request).start()
 
-    send(s, {"request_type": "login", "role": "1", "password": "luka123"})
+    send(s, {"request_type": "login", "role": "1", "pc_name": socket.gethostname(), "password": "luka123"})
 
-    targetID = input()
-    targetID = int(targetID)
-    send(s, {"request_type": "block_screen", "target_id": targetID})
-    time.sleep(5)
-    send(s, {"request_type": "unblock_screen", "target_id": targetID})
-    
-    temp_send_request()
+    main()
