@@ -1,7 +1,6 @@
 from common.util import send, CONFIG
 
 import threading
-import pyautogui
 import keyboard
 import imutils
 import random
@@ -12,6 +11,9 @@ import time
 import json
 import cv2
 import os
+
+IP = CONFIG["ip"]
+PORT = CONFIG["port"]
 
 def screenshare():
     screenshareSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,10 +26,12 @@ def screenshare():
         try: data = screenshareSocket.recv(1024)
         except (ConnectionResetError, ConnectionAbortedError):
             print("Server Closed")
+            screensharing = False
             os._exit(0)
 
         if not data:
             print("Server Closed")
+            screensharing = False
             os._exit(0)
 
         data = data.decode("utf-8")
@@ -48,11 +52,11 @@ def screenshare():
         while len(data) < payloadSize:
             try: packet = screenshareSocket.recv(4096)
             except (ConnectionResetError, ConnectionAbortedError):
-                print("Server Closed")
+                cv2.destroyAllWindows()
                 return
 
             if not packet:
-                print("Server Closed")
+                cv2.destroyAllWindows()
                 return
 
             data += packet
@@ -85,15 +89,12 @@ def main():
         print(data)
 
 def random_clicks():
-    while True:
+    while screensharing:
         time.sleep(random.uniform(2, 5))
         send(s, {"request_type": "click", "target_id": TARGET_ID, "x": random.randint(0, 1080), "y": random.randint(0, 1920)})
 
 if __name__ == "__main__":
     keyboard.add_hotkey("ctrl+shift+z", lambda: os._exit(0))
-
-    IP = CONFIG["ip"]
-    PORT = CONFIG["port"]
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((IP, PORT))
@@ -101,7 +102,8 @@ if __name__ == "__main__":
 
     threading.Thread(target=main).start()
     send(s, {"request_type": "login", "role": 1, "pc_name": socket.gethostname(), "password": "luka123"})
-
+    
+    screensharing = True
     TARGET_ID = int(input())
     screenshare()
 
