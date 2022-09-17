@@ -3,12 +3,10 @@ from common.util import *
 
 import socket
 import json
-import sys
 import os
 
-with open("config.json", "r") as f: config = json.load(f)
-IP = config["ip"]
-PORT = config["port"]
+IP = CONFIG["ip"]
+PORT = CONFIG["port"]
 
 def receive():
     print(f"Connected to {IP}:{PORT}")
@@ -29,7 +27,11 @@ def receive():
 
             data = json.loads(action)
             if data["request_type"] == "action":
-                try: commandFunctions[data["type"]]()
+                arguments = data.copy()
+                arguments.pop("request_type")
+                arguments.pop("type")
+
+                try: commandFunctions[data["type"]](*arguments.values())
                 except KeyError: print(f"Unknown Action: {data['type']}")
                 continue
             elif data["request_type"] == "callback":
