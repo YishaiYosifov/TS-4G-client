@@ -36,6 +36,6 @@ if __name__ == "__main__":
 
     threading.Thread(target=main).start()
 
-    send(s, {"request_type": "login", "role": 2, "pc_name": socket.gethostname(), "password": "luka123"})
+    send(s, {"request_type": "login", "role": 1, "pc_name": socket.gethostname(), "password": "luka123"})
 
     temp_send_request()

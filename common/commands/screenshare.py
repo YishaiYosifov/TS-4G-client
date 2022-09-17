@@ -1,6 +1,7 @@
 from common.util import CONFIG, send
 
 import threading
+import pyautogui
 import imutils
 import struct
 import socket
@@ -43,7 +44,9 @@ def send_screenshare(s : socket.socket):
                 
                 message = struct.pack("Q", len(pickledFrame)) + pickledFrame
                 try: s.sendall(message)
-                except ConnectionResetError:
+                except (ConnectionResetError, ConnectionAbortedError):
                     print("Screenshare Closed")
                     s.close()
                     return
+
+def click(x : int, y : int): pyautogui.click(x, y)
