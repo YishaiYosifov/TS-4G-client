@@ -17,7 +17,7 @@ def start_screenshare(targetID, screenshareID):
 
     send(s, {"request_type": "init_target_screenshare", "target_id": targetID, "screenshare_id": screenshareID})
     threading.Thread(target=send_screenshare, args=(s,)).start()
-    
+
 def send_screenshare(s : socket.socket):
     try: callback = s.recv(1024)
     except (ConnectionResetError, ConnectionAbortedError): return
